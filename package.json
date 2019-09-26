@@ -12,7 +12,6 @@
     "@alicloud/pop-core": "^1.7.7",
     "bunyan": "^1.8.12",
     "dayjs": "^1.8.16",
-    "forward.js": "^1.0.20",
     "ssh2": "^0.8.5"
   }
 }

@@ -1,0 +1,26 @@
+{
+  "RAM": {
+    "accessKeyId": "----------------",
+	"accessKeySecret": "------------------------------"
+  },
+  "ECS": {
+    "RegionId": "ap-southeast-1",
+    "AutoReleaseTime": "18:00:00",
+    "ImageId": "centos_7_06_64_20G_alibase_20190711.vhd",
+    "InstanceType": "ecs.xn4.small",
+    "InternetMaxBandwidthOut": 10,
+    "InternetChargeType": "PayByTraffic",
+    "SystemDisk.Size": "20",
+    "SystemDisk.Category": "cloud_efficiency",
+    "SpotStrategy": "SpotAsPriceGo"
+  },
+  "ssr_server": {
+    "port": 33333,
+    "password": "----------------",
+    "method": "aes-128-ctr",
+    "protocol": "auth_sha1_v4",
+    "protocol_param": "",
+    "obfs": "plain",
+    "obfs_param": ""
+  }
+}

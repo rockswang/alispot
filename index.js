@@ -134,13 +134,10 @@ async function main () {
         IpProtocol: 'tcp',
         SourceCidrIp: '0.0.0.0/0'
       }
-      const port = config.ssr_server.port + ''
-      const PortRange = port.slice(0, -1) + '0/' + port.slice(0, -1) + '9'
       result = await Promise.all([
         client.request('AuthorizeSecurityGroup', { ...params, PortRange: '22/22' }, options),
         client.request('AuthorizeSecurityGroup', { ...params, PortRange: '80/80' }, options),
-        client.request('AuthorizeSecurityGroup', { ...params, PortRange: '443/443' }, options),
-        client.request('AuthorizeSecurityGroup', { ...params, PortRange }, options)
+        client.request('AuthorizeSecurityGroup', { ...params, PortRange: '443/443' }, options)
       ])
       log.debug({ result }, 'AuthorizeSecurityGroup')
     } else {
@@ -223,30 +220,6 @@ async function main () {
     result = await statusCheck(client, 'DescribeInstances', params, 10000, 5000, 20, r => r.Instances.Instance[0].Status === 'Running')
     log.debug({ result }, 'DescribeInstances')
     log.info('实例已重启，耗时约%s ms', (Date.now() - start))
-
-    conn = await sshConnect(sshParams)
-    log.info('SSH已重新连接；开始安装SSR Server...')
-    await sshExec(conn, 'yum install git -y')
-    await sshExec(conn, 'git clone -b manyuser https://github.com/shadowsocksr-backup/shadowsocksr.git')
-    const ssr = config.ssr_server
-    let args = `-p ${ssr.port} -k '${ssr.password}' -m '${ssr.method}' -O '${ssr.protocol}' -o '${ssr.obfs}'`
-    if (ssr.protocol_param) args += ` -G '${ssr.protocol_param}'`
-    if (ssr.obfs_param) args += ` -g '${ssr.obfs_param}'`
-    await sshExec(conn, `nohup python shadowsocksr/shadowsocks/server.py ${args} >> /dev/null 2>&1 &`)
-    try { conn.end() } catch (err) { }
-    log.info('SSR服务端已启动')
-    log.info('SSR客户端配置信息：')
-    log.info('  服务器IP: %s', IpAddress)
-    log.info('  服务器端口: %s', ssr.port)
-    log.info('  密码: %s', ssr.password)
-    log.info('  加密: %s', ssr.method)
-    log.info('  协议: %s', ssr.protocol)
-    log.info('  协议参数：%s', ssr.protocol_param || '无')
-    log.info('  混淆: %s', ssr.obfs)
-    log.info('  混淆参数: %s', ssr.obfs_param || '无')
-
-    log.info('启动本地端口转发，正在监听%s...', ssr.port)
-    forwardjs(['' + ssr.port, `${IpAddress}:${ssr.port}`])
   } catch (error) {
     log.fatal(error)
   }

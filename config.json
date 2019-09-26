@@ -13,14 +13,5 @@
     "SystemDisk.Size": "20",
     "SystemDisk.Category": "cloud_efficiency",
     "SpotStrategy": "SpotAsPriceGo"
-  },
-  "ssr_server": {
-    "port": 33333,
-    "password": "----------------",
-    "method": "aes-128-ctr",
-    "protocol": "auth_sha1_v4",
-    "protocol_param": "",
-    "obfs": "plain",
-    "obfs_param": ""
   }
 }

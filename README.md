@@ -1,7 +1,9 @@
 # 概述
-自动创建阿里云抢占式实例，启用GoogleBBR网络加速，然后自动安装启动SSR服务器。<br/>
-使用speedtest.net实测速度，可以跑满带宽上限。<br/>
-注意，本人仅在Windows10 x64上测试过，其它平台未测试。<br/>
+* 目前阿里云海外节点的抢占式实例非常便宜，平均都在0.01~0.02元/小时，外加流量费0.5~1.0元/G，特别适合上班族尤其是程序员使用。
+* 上班来了启动脚本，下班了自动释放，一点不浪费，只要不看视频，一天的成本也就2毛钱。
+* 本脚本自动创建阿里云抢占式实例，启用GoogleBBR网络加速，然后自动安装启动SSR服务器。
+* 使用speedtest.net实测速度，可以跑满带宽上限。
+* 注意，本人仅在Windows10 x64上测试过，其它平台未测试。
 
 # 前提
 * 在阿里云有个账号
@@ -25,8 +27,15 @@
 
 # 启动
 * 执行 `npm start` 然后等待即可
-* 命令是按照windows配置的，linux/mac上没测过，可以试试：
-  `node index.js | ./node_modules/.bin/bunyan`
+* 命令是按照windows配置的，linux/mac上没测过，可以试试：<br/>
+  `node index.js | ./node_modules/.bin/bunyan`<br/>
    bunyan是日志过滤工具，不用也可以
 * 整个脚本运行大概需要3 ~ 5分钟，最后会打印出SSR连接信息，照此修改客户端配置即可，通常就是改个IP
-* 下一步会增加个本地端口转发，这样连IP都不用改了，设成localhost即可
+* 脚本最后会使用forward.js创建一个端口转发，这样SSR客户端只要把服务端IP设成localhost即可，连上一步说的IP都不用改了
+
+# 参考
+* [阿里云 OpenAPI Explorer](https://api.aliyun.com/#/)
+* [ssr_py版的命令行参考](https://doubibackup.com/hi10k-7p-4.html)
+* 启用BBR的shell脚本bbr.sh来自[这里](https://www.codercto.com/a/25431.html)，我这里为了实现自动化去掉了用户交互部分
+* forward.js来自[这里](https://github.com/sjitech/forward.js)，因为这不是个node模块，因此直接引用源代码
+

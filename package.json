@@ -4,7 +4,7 @@
   "description": "Created an alicloud ECS spot-instance, and enable Google BBR",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js | node_modules\\.bin\\bunyan"
   },
   "author": "rockswang",
   "license": "MIT",

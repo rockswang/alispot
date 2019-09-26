@@ -7,6 +7,8 @@ const dayjs = require('dayjs')
 const bunyan = require('bunyan')
 const ssh = require('ssh2')
 
+const { forwardjs } = require('./forward')
+
 const log = bunyan.createLogger({
   name: 'alispot',
   streams: [{
@@ -68,7 +70,7 @@ async function statusCheck (client, api, params, beforeStart, interval, times, c
 
 async function main () {
   try {
-    const confPath = process.argv[3] || path.join(__dirname, 'config.json')
+    const confPath = process.argv[2] || path.join(__dirname, 'config.json')
     const config = JSON.parse(fs.readFileSync(confPath, 'utf8'))
     const { RAM, ECS } = config
     const client = new Core({
@@ -242,6 +244,9 @@ async function main () {
     log.info('  协议参数：%s', ssr.protocol_param || '无')
     log.info('  混淆: %s', ssr.obfs)
     log.info('  混淆参数: %s', ssr.obfs_param || '无')
+
+    log.info('启动本地端口转发，正在监听%s...', ssr.port)
+    forwardjs(['' + ssr.port, `${IpAddress}:${ssr.port}`])
   } catch (error) {
     log.fatal(error)
   }

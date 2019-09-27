@@ -17,12 +17,29 @@
 # 前提
 * 在阿里云有个账号
 * 在阿里云**充值至少120元**人民币。这是因为阿里云要求账户余额必须在100以上才能创建抢占式实例。剩下20用来日常消费，只要不经常看视频应该够用挺长时间了。**不要担心100元打水漂，通过支付宝/网银的充值，可在支付后的3个月内申请原路提现。**
-* 在阿里云控制台"访问控制"里面，添加一个RAM子用户，此账户专门用来支持API调用。![RAM用户1](https://user-images.githubusercontent.com/2248386/65750270-9115f980-e13a-11e9-89b1-b2db34c9f688.png)![RAM用户2](https://user-images.githubusercontent.com/2248386/65750271-91ae9000-e13a-11e9-9e0b-d32aebfa43ce.png)
-* 给该RAM用户**添加AliyunECSFullAccess和AliyunVPCFullAccess权限**。因为脚本需要创建虚拟专网和ECS服务器。![RAM权限1](https://user-images.githubusercontent.com/2248386/65750268-907d6300-e13a-11e9-854b-5f3d75f3b7f2.jpg)
-![RAM权限2](https://user-images.githubusercontent.com/2248386/65750269-9115f980-e13a-11e9-91f7-55d3a939483e.jpg)
-* 给该RAM用户创建一个AccessKey，然后把AccessKey ID和AccessKey Secret记住。注意：为了安全起见，阿里云不会保存Secret，因此**Secret只会显示一次，一定马上复制保存好！！**否则就得创建个新的AccessKey。![RAM用户3](https://user-images.githubusercontent.com/2248386/65750273-91ae9000-e13a-11e9-98aa-761345764b0b.png)
+* 在阿里云控制台"访问控制"里面，添加一个RAM子用户，此账户专门用来支持API调用。
+* 给该RAM用户**添加AliyunECSFullAccess和AliyunVPCFullAccess权限**。因为脚本需要创建虚拟专网和ECS服务器。
+* 给该RAM用户创建一个AccessKey，然后把AccessKey ID和AccessKey Secret记住。注意：为了安全起见，阿里云不会保存Secret，因此**Secret只会显示一次，一定马上复制保存好！！**否则就得创建个新的AccessKey。
 * 本地安装了node.js。我只在node12上测试过，但估计node8以上都应该没问题。
 * 本脚本不包含SSR客户端，请自行安装，推荐C#版本。
+
+ ![访问控制](https://user-images.githubusercontent.com/2248386/65750277-92472680-e13a-11e9-8070-78f3c5d056dd.png)
+<center>访问控制</center>
+ 
+  ![RAM用户1](https://user-images.githubusercontent.com/2248386/65750270-9115f980-e13a-11e9-89b1-b2db34c9f688.png)
+<center>创建RAM用户1</center>
+ 
+  ![RAM用户2](https://user-images.githubusercontent.com/2248386/65750271-91ae9000-e13a-11e9-9e0b-d32aebfa43ce.png)
+<center>创建RAM用户2</center>
+ 
+  ![RAM权限1](https://user-images.githubusercontent.com/2248386/65750268-907d6300-e13a-11e9-854b-5f3d75f3b7f2.jpg)
+<center>添加RAM权限1</center>
+ 
+  ![RAM权限2](https://user-images.githubusercontent.com/2248386/65750269-9115f980-e13a-11e9-91f7-55d3a939483e.jpg)
+<center>添加RAM权限1</center>
+ 
+  ![RAM用户3](https://user-images.githubusercontent.com/2248386/65750273-91ae9000-e13a-11e9-98aa-761345764b0b.png)
+<center>获取AccessKeyID和AccessKeySecret</center>
 
 # 阿里云抢占式实例和流量计费规则
 * 抢占式实例有原价和市场价，你还可以设定出价，出价比市场价高才能创建成功，但是计费**总是按照市场价**的。
@@ -50,8 +67,8 @@
 * 推荐设置一个自动释放时间AutoReleaseTime，否则1小时后服务器可能会被自动回收。
 * 带宽上限InternetMaxBandwidthOut预设值是10(M)，你可以根据需求调整。
 * ECS的其它配置保持默认即可。
-* 在ssr_server配置段，根据你使用的SSR客户端的实际配置修改即可
-### 阿里云海外节点地域对应表: 
+* 阿里云海外节点地域对应表: 
+
 RegionId | 地域名称
 --- | ---
 cn-hongkong | 香港 

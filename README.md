@@ -19,12 +19,11 @@
 * 给该RAM用户**添加AliyunECSFullAccess和AliyunVPCFullAccess权限**。因为脚本需要创建虚拟专网和ECS服务器。
 * 给该RAM用户创建一个AccessKey，然后把AccessKey ID和AccessKey Secret记住。注意：为了安全起见，阿里云不会保存Secret，因此**Secret只会显示一次，一定马上复制保存好！！**否则就得创建个新的AccessKey。
 * 本地安装了node.js。我只在node12上测试过，但估计node8以上都应该没问题。
-* 本脚本不包含SSR客户端，请自行安装，推荐C#版本。
 
- ![访问控制](https://user-images.githubusercontent.com/2248386/65750277-92472680-e13a-11e9-8070-78f3c5d056dd.png)
+![访问控制](https://user-images.githubusercontent.com/2248386/65750277-92472680-e13a-11e9-8070-78f3c5d056dd.png)
 <center>访问控制</center>
  
-  ![RAM用户1](https://user-images.githubusercontent.com/2248386/65750270-9115f980-e13a-11e9-89b1-b2db34c9f688.png)
+![RAM用户1](https://user-images.githubusercontent.com/2248386/65750270-9115f980-e13a-11e9-89b1-b2db34c9f688.png)
 <center>创建RAM用户1</center>
  
   ![RAM用户2](https://user-images.githubusercontent.com/2248386/65750271-91ae9000-e13a-11e9-9e0b-d32aebfa43ce.png)

@@ -156,6 +156,7 @@ async function main () {
     if (result.TotalCount === 0) {
       log.info('创建VSwitch', ECS.RegionId)
       params = {
+        RegionId: ECS.RegionId,
         CidrBlock: '172.16.0.0/24',
         VpcId,
         ZoneId,

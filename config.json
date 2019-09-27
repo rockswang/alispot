@@ -1,7 +1,7 @@
 {
   "RAM": {
     "accessKeyId": "----------------",
-	"accessKeySecret": "------------------------------"
+    "accessKeySecret": "------------------------------"
   },
   "ECS": {
     "RegionId": "ap-southeast-1",

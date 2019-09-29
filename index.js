@@ -22,7 +22,11 @@ const log = bunyan.createLogger({
 
 const options = { method: 'POST', timeout: 20000 }
 
-function sshConnect (params) {
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function _sshConnect (params) {
   return new Promise((resolve, reject) => {
     const conn = new ssh.Client()
     conn.on('ready', () => {
@@ -31,6 +35,18 @@ function sshConnect (params) {
       reject(err)
     }).connect(params)
   })
+}
+
+async function sshConnect (params) {
+  for (let retryCount = 0; ; retryCount++) {
+    try {
+      return await _sshConnect(params)
+    } catch (err) {
+      if (retryCount >= 3) throw err
+      log.warn(`SSH连接失败，重试第${retryCount + 1}次...`)
+      await sleep(500)
+    }
+  }
 }
 
 function sshExec (conn, cmd) {
@@ -57,12 +73,12 @@ function sshExec (conn, cmd) {
 }
 
 async function statusCheck (client, api, params, beforeStart, interval, times, check) {
-  if (beforeStart > 0) await new Promise(resolve => setTimeout(resolve, beforeStart))
+  if (beforeStart > 0) await sleep(beforeStart)
   let retryCount = 0
   while (retryCount < times) {
     const result = await client.request(api, params, options)
     if (check(result)) return result
-    await new Promise(resolve => setTimeout(resolve, interval))
+    await sleep(interval)
     retryCount++
   }
   if (retryCount >= times) throw new Error('statusCheck timeout: ' + api)
@@ -135,6 +151,7 @@ async function main () {
         SourceCidrIp: '0.0.0.0/0'
       }
       result = await Promise.all([
+        client.request('AuthorizeSecurityGroup', { ...params, IpProtocol: 'icmp', PortRange: '-1/-1' }, options), // enable ping
         client.request('AuthorizeSecurityGroup', { ...params, PortRange: '22/22' }, options),
         client.request('AuthorizeSecurityGroup', { ...params, PortRange: '80/80' }, options),
         client.request('AuthorizeSecurityGroup', { ...params, PortRange: '443/443' }, options)
@@ -153,6 +170,7 @@ async function main () {
     if (result.TotalCount === 0) {
       log.info('创建VSwitch', ECS.RegionId)
       params = {
+        RegionId: ECS.RegionId,
         CidrBlock: '172.16.0.0/24',
         VpcId,
         ZoneId,

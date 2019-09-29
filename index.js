@@ -7,8 +7,6 @@ const dayjs = require('dayjs')
 const bunyan = require('bunyan')
 const ssh = require('ssh2')
 
-const { forwardjs } = require('./forward')
-
 const log = bunyan.createLogger({
   name: 'alispot',
   streams: [{
@@ -144,24 +142,25 @@ async function main () {
       result = await client.request('CreateSecurityGroup', params, options)
       log.debug({ result }, 'CreateSecurityGroup')
       SecurityGroupId = result.SecurityGroupId
-      params = {
-        RegionId: ECS.RegionId,
-        SecurityGroupId,
-        IpProtocol: 'tcp',
-        SourceCidrIp: '0.0.0.0/0'
-      }
-      result = await Promise.all([
-        client.request('AuthorizeSecurityGroup', { ...params, IpProtocol: 'icmp', PortRange: '-1/-1' }, options), // enable ping
-        client.request('AuthorizeSecurityGroup', { ...params, PortRange: '22/22' }, options),
-        client.request('AuthorizeSecurityGroup', { ...params, PortRange: '80/80' }, options),
-        client.request('AuthorizeSecurityGroup', { ...params, PortRange: '443/443' }, options)
-      ])
-      log.debug({ result }, 'AuthorizeSecurityGroup')
     } else {
       SecurityGroupId = result.SecurityGroups.SecurityGroup[0].SecurityGroupId
       VpcId = result.SecurityGroups.SecurityGroup[0].VpcId
     }
     log.info(`VpcId: ${VpcId}, SecurityGroupId: ${SecurityGroupId}`)
+    params = {
+      RegionId: ECS.RegionId,
+      SecurityGroupId,
+      IpProtocol: 'tcp',
+      SourceCidrIp: '0.0.0.0/0'
+    }
+    result = await Promise.all([
+      client.request('AuthorizeSecurityGroup', { ...params, IpProtocol: 'icmp', PortRange: '-1/-1' }, options), // enable ping
+      client.request('AuthorizeSecurityGroup', { ...params, PortRange: '22/22' }, options),
+      client.request('AuthorizeSecurityGroup', { ...params, PortRange: '80/80' }, options),
+      client.request('AuthorizeSecurityGroup', { ...params, PortRange: '443/443' }, options)
+    ])
+    log.debug({ result }, 'AuthorizeSecurityGroup')
+    log.info(`为安全组${SecurityGroupId}开启端口`)
 
     let VSwitchId
     params = { RegionId: ECS.RegionId, VpcId, ZoneId }

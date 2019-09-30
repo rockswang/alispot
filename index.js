@@ -254,7 +254,7 @@ async function main () {
     await sshExec(conn, `nohup python shadowsocksr/shadowsocks/server.py ${args} >> /dev/null 2>&1 &`)
     try { conn.end() } catch (err) { }
     log.info('SSR服务端已启动')
-    log.info('SSR客户端配置信息：')
+    log.info('===== SSR客户端配置信息 =====')
     log.info('  服务器IP: %s', IpAddress)
     log.info('  服务器端口: %s', ssr.port)
     log.info('  密码: %s', ssr.password)
@@ -263,8 +263,13 @@ async function main () {
     log.info('  协议参数：%s', ssr.protocol_param || '无')
     log.info('  混淆: %s', ssr.obfs)
     log.info('  混淆参数: %s', ssr.obfs_param || '无')
-
-    log.info('启动本地端口转发，正在监听%s...', ssr.port)
+    log.info('===== SSH连接信息 =====')
+    log.info('  IP：%s: ', IpAddress)
+    log.info('  端口: 22')
+    log.info('  操作系统账户: root')
+    log.info('  操作系统密码: %s', Password)
+    log.info('===== 本地端口转发 =====')
+    log.info('  正在监听端口：%s', ssr.port)
     forwardjs(['' + ssr.port, `${IpAddress}:${ssr.port}`])
   } catch (error) {
     log.fatal(error)

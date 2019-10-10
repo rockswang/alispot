@@ -258,9 +258,10 @@ async function main () {
     }
     let conn = await sshConnect(sshParams)
     log.info('SSH已连接；开始启用GoogleBBR...')
+    start = Date.now()
     await sshExec(conn, 'wget --no-check-certificate https://github.com/rockswang/alispot/raw/master/bbr.sh && chmod +x bbr.sh && ./bbr.sh')
     try { conn.end() } catch (err) { }
-    log.info('GoogleBBR已启用；系统重启...')
+    log.info('GoogleBBR已启用，耗时约%s ms；系统重启...', (Date.now() - start))
 
     start = Date.now()
     result = await statusCheck(client, 'DescribeInstances', params, 10000, 5000, 20, r => r.Instances.Instance[0].Status === 'Running')

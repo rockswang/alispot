@@ -153,6 +153,8 @@ async function main () {
       IpProtocol: 'tcp',
       SourceCidrIp: '0.0.0.0/0'
     }
+    const port = config.ssr_server ? config.ssr_server.port + '' : '33333'
+    const PortRange = port.slice(0, -1) + '0/' + port.slice(0, -1) + '9'
     result = await Promise.all([
       client.request('AuthorizeSecurityGroup', { ...params, IpProtocol: 'icmp', PortRange: '-1/-1' }, options), // enable ping
       client.request('AuthorizeSecurityGroup', { ...params, PortRange: '22/22' }, options),
@@ -190,9 +192,19 @@ async function main () {
     log.info(`VSwitchId: ${VSwitchId}`)
 
     let { AutoReleaseTime, Password } = ECS
-    if (AutoReleaseTime && /\d{2}:\d{2}:\d{2}/.test(AutoReleaseTime)) {
-      const localTime = dayjs().format('YYYY-MM-DD') + ' ' + AutoReleaseTime
-      const isoTime = dayjs(localTime).toISOString()
+    if (AutoReleaseTime) {
+      let localTime
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(AutoReleaseTime)) { // YYYY-MM-DD HH:mm:ss
+        localTime = AutoReleaseTime
+      } else if (/^\d{2}:\d{2}:\d{2}$/.test(AutoReleaseTime)) { // HH:mm:ss
+        localTime = dayjs().format('YYYY-MM-DD') + ' ' + AutoReleaseTime
+      } else {
+        throw new Error('AutoReleaseTime格式错误，必须是本地时间"YYYY-MM-DD HH:mm:ss"或"HH:mm:ss"格式')
+      }
+      localTime = dayjs(localTime)
+      // 如果设置的自动释放时间早于当前时刻，则将其向后顺延1天
+      while (localTime.isBefore(dayjs())) localTime = localTime.add(1, 'day')
+      const isoTime = localTime.toISOString()
       AutoReleaseTime = isoTime.replace(/\.\d{3}Z$/, 'Z')
     }
     Password = Password || ('AliSpot@' + crypto.createHash('MD5').update('alispot' + Date.now()).digest('hex').substr(0, 13))
@@ -202,7 +214,8 @@ async function main () {
       SecurityGroupId,
       VSwitchId,
       AutoReleaseTime,
-      Password
+      Password,
+      InstanceName: 'alispotCreatedInstance'
     }
     result = await client.request('RunInstances', params, options)
     log.debug({ result }, 'RunInstances')
@@ -229,9 +242,10 @@ async function main () {
     }
     let conn = await sshConnect(sshParams)
     log.info('SSH已连接；开始启用GoogleBBR...')
+    start = Date.now()
     await sshExec(conn, 'wget --no-check-certificate https://github.com/rockswang/alispot/raw/master/bbr.sh && chmod +x bbr.sh && ./bbr.sh')
     try { conn.end() } catch (err) { }
-    log.info('GoogleBBR已启用；系统重启...')
+    log.info('GoogleBBR已启用，耗时约%s ms；系统重启...', (Date.now() - start))
 
     start = Date.now()
     result = await statusCheck(client, 'DescribeInstances', params, 10000, 5000, 20, r => r.Instances.Instance[0].Status === 'Running')

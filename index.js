@@ -155,7 +155,7 @@ async function main () {
       IpProtocol: 'tcp',
       SourceCidrIp: '0.0.0.0/0'
     }
-    const port = config.ssr_server.port + ''
+    const port = config.ssr_server ? config.ssr_server.port + '' : '33333'
     const PortRange = port.slice(0, -1) + '0/' + port.slice(0, -1) + '9'
     result = await Promise.all([
       client.request('AuthorizeSecurityGroup', { ...params, IpProtocol: 'icmp', PortRange: '-1/-1' }, options), // enable ping
@@ -195,11 +195,34 @@ async function main () {
     log.info(`VSwitchId: ${VSwitchId}`)
 
     let { AutoReleaseTime, Password } = ECS
-    if (AutoReleaseTime && /\d{2}:\d{2}:\d{2}/.test(AutoReleaseTime)) {
-      const localTime = dayjs().format('YYYY-MM-DD') + ' ' + AutoReleaseTime
-      const isoTime = dayjs(localTime).toISOString()
+    if (AutoReleaseTime) {
+      let localTime
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(AutoReleaseTime)) { // YYYY-MM-DD HH:mm:ss
+        localTime = AutoReleaseTime
+      } else if (/^\d{2}:\d{2}:\d{2}$/.test(AutoReleaseTime)) { // HH:mm:ss
+        localTime = dayjs().format('YYYY-MM-DD') + ' ' + AutoReleaseTime
+      } else {
+        throw new Error('AutoReleaseTime格式错误，必须是本地时间"YYYY-MM-DD HH:mm:ss"或"HH:mm:ss"格式')
+      }
+      localTime = dayjs(localTime)
+      // 如果设置的自动释放时间早于当前时刻，则将其向后顺延1天
+      while (localTime.isBefore(dayjs())) localTime = localTime.add(1, 'day')
+      const isoTime = localTime.toISOString()
       AutoReleaseTime = isoTime.replace(/\.\d{3}Z$/, 'Z')
     }
+    // if (Password) { // 预设密码的情况下，检查是否已有现成的实例
+    //   params = {
+    //     RegionId: ECS.RegionId,
+    //     InstanceName: 'alispotCreatedInstance'
+    //   }
+    //   result = await client.request('DescribeInstances', params, options)
+    //   if (result.TotalCount > 0 && result.Instances.Instance[0].Status === 'Running') {
+    //     const inst = result.Instances.Instance[0]
+    //     params = { RegionId: ECS.RegionId, InstanceId: inst.InstanceId, AutoReleaseTime }
+    //     await client.request('ModifyInstanceAutoReleaseTime', params, options)
+    //     // TODO: 
+    //   }
+    // }
     Password = Password || ('AliSpot@' + crypto.createHash('MD5').update('alispot' + Date.now()).digest('hex').substr(0, 13))
     params = {
       ...ECS,
@@ -207,7 +230,8 @@ async function main () {
       SecurityGroupId,
       VSwitchId,
       AutoReleaseTime,
-      Password
+      Password,
+      InstanceName: 'alispotCreatedInstance'
     }
     result = await client.request('RunInstances', params, options)
     log.debug({ result }, 'RunInstances')

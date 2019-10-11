@@ -38,6 +38,7 @@ function _sshConnect (params) {
 }
 
 async function sshConnect (params) {
+  await sleep(800) // 稍微延迟，解决首次SSH连接成功率不高的问题
   for (let retryCount = 0; ; retryCount++) {
     try {
       return await _sshConnect(params)
